@@ -1,3 +1,5 @@
+from typing import Any
+
 from rest_framework import serializers
 from cinema.models import Genre, Actor, CinemaHall, Movie, MovieSession
 
@@ -15,7 +17,7 @@ class ActorSerializer(serializers.ModelSerializer):
         model = Actor
         fields = ["id", "first_name", "last_name", "full_name"]
 
-    def get_full_name(self, obj):
+    def get_full_name(self, obj: Actor) -> str:
         return f"{obj.first_name} {obj.last_name}"
 
 
@@ -32,7 +34,7 @@ class MovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = ["id", "title", "description", "duration", "genres", "actors"]
 
-    def to_representation(self, instance):
+    def to_representation(self, instance: Movie) -> dict[str, Any]:
         data = super().to_representation(instance)
 
         data["genres"] = [g.name for g in instance.genres.all()]
@@ -66,7 +68,9 @@ class MovieSessionSerializer(serializers.ModelSerializer):
 class MovieSessionListSerializer(serializers.ModelSerializer):
     movie_title = serializers.CharField(source="movie.title")
     cinema_hall_name = serializers.CharField(source="cinema_hall.name")
-    cinema_hall_capacity = serializers.IntegerField(source="cinema_hall.capacity")
+    cinema_hall_capacity = serializers.IntegerField(
+        source="cinema_hall.capacity"
+    )
 
     class Meta:
         model = MovieSession
@@ -87,10 +91,10 @@ class MovieSessionMovieSerializer(serializers.ModelSerializer):
         model = Movie
         fields = ["id", "title", "description", "duration", "genres", "actors"]
 
-    def get_genres(self, obj):
+    def get_genres(self, obj: Movie) -> list[str]:
         return [g.name for g in obj.genres.all()]
 
-    def get_actors(self, obj):
+    def get_actors(self, obj: Movie) -> list[str]:
         return [f"{a.first_name} {a.last_name}" for a in obj.actors.all()]
 
 
